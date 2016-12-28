@@ -1,35 +1,84 @@
-var jsonString;
-var http = new XMLHttpRequest()
+var areaURL = 'https://code-your-future.github.io/api-demo/area/index.json';
 
-// Specify the Method and the URL we want to access
-http.open('GET', 'https://code-your-future.github.io/api-demo/area/index.json')
+function getData(address, dealWithData) {
+    var http = new XMLHttpRequest()
+    http.open('GET', address)
+    http.onreadystatechange = function() {
+        if (this.readyState === 4 && this.status === 200) {
+            // first we get data from server
+            var data = this.responseText;
+            // convert data from string JSON to JSON
+            var jsonData = JSON.parse(data);
+            // call the dealWithData callback function
+            dealWithData(jsonData.data);
+        }
+    }
+    http.send(); // Make the request
+}
 
-// Function to be called as the request happens
-http.onreadystatechange = function() {
-    // readyState === 4 means the request has finished (http://www.w3schools.com/xml/ajax_xmlhttprequest_response.asp)
-    // status === 200  means the request was OK
-    if (this.readyState === 4 && this.status === 200) {
-        jsonString = (this.responseText); // The body returned by the server (as a string)
-    
-    Print();
+function makeOrganisationURL(area) {
+    return 'https://code-your-future.github.io/api-demo/area/' + area + '/index.json';
+}
+
+function logData(data) {
+    console.log(data);
+}
+
+function displayOrganisation(organisationInfo) {
+    console.info(organisationInfo);
+    var areaContent = '';
+// website:
+// email : 
+// area: 
+// process: Contact for information
+// organisation: New Horizon Youth Centre
+// clients: Young people - 16-25
+// days: N/A
+// telephone: 020 7388 5560
+// services: Legal, housing, benefits, jobs, education
+// borough: Camden
+// type: YP-Families
+
+    areaContent = '<div class=\'box\'>'
+    areaContent += '<h1>' + organisationInfo.organisation + '</h1>';
+    areaContent += '<a href=' + organisationInfo.website + '>website</a>';
+    areaContent += '</div>'
+    document.getElementById('areaInfo').innerHTML = areaContent;
+
+}
+
+function displayAreaInfo(areaInfo) {
+    for (info in areaInfo) {
+        displayOrganisation(areaInfo[info]);
     }
 }
 
-http.send(); // Make the request
-function Print() {
-var myObject = JSON.parse(jsonString);
-for (var key in myObject){
-    myFunction(myObject[key][i]);
-	for (var i in myObject[key]) {
-	myFunction(myObject[key][i]);
-}
+function areaButtonClick(event) {
+    if (event) {
+        var areaName = event.target.textContent;
+        var areaInfoURL = makeOrganisationURL(areaName);
+        getData(areaInfoURL, displayAreaInfo)
+    }
 }
 
+function addButtonsForAreas(areas) {
+    var areas = areas;
+    for (area in areas) {
+        addAreaButton(areas[area]);
+    }
 }
-	
-function myFunction(t) {
+
+function loadPage() {
+    // console.info('Our file is now loaded');
+    getData(areaURL, addButtonsForAreas)
+
+}
+
+    
+function addAreaButton(areaName) {
     var btn = document.createElement("BUTTON");
-    var text = document.createTextNode(t);
+    var text = document.createTextNode(areaName);
     btn.appendChild(text);
-    document.getElementById("continer").appendChild(btn);
+    btn.onclick = areaButtonClick.bind(this);
+    document.getElementById("areaButtons").appendChild(btn);
 }
